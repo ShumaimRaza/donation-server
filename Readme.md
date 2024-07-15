@@ -1,0 +1,1 @@
+cpy './uploads/**/*' './dist/uploads'
