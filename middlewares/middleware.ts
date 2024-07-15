@@ -6,9 +6,7 @@ export const checkTier = (req: Request, res: Response, next: Function) => {
         return next();
     } else {
         const user = req.user as IUser
-        if (user.tier === 'Gold') {
-            // TODO: add appropriate attributes and limits to the request
-        }
+        
     }
     next();
 };
