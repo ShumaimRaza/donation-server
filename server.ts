@@ -92,6 +92,6 @@ app.use("/ngo", ngoRouter)
 //Initializa Campaigns
 initIfEmpty();
 
-app.listen(port, () => {
+app.listen(port || 8080, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
