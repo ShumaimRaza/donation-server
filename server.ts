@@ -28,7 +28,7 @@ const port = process.env.PORT || 4000;
 
 
 
-const dbUri = process.env.DB;
+const dbUri = "mongodb+srv://lalakhan98499:WyFbgiQup22kLHee@donor.w8x5gug.mongodb.net/";
 
 if (!dbUri) {
   console.error('No DB URI provided in .env file');
