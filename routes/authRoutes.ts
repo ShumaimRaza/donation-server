@@ -8,21 +8,11 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import { getOrCreateContainer } from '../storage/storage';
+import { uploader } from '../storage/uploader';
 
 const router: Router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dest = path.join(__dirname, '../uploads/photos');
-    cb(null, dest);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
-
-router.post('/register', upload.single('ngoIcon'), async (req, res) => {
+router.post('/register', uploader.single('ngoIcon'), async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const newUser = new User({
@@ -34,13 +24,10 @@ router.post('/register', upload.single('ngoIcon'), async (req, res) => {
     });
     const user = await newUser.save();
     if (req.body.role === "NGO") {
+      const file:any = req.file;
       if (req.file) {
         // upload image
-        const filename = `${Date.now()}-${req.file.originalname}`;
-        const blobClient = (await getOrCreateContainer("uploads")).getBlockBlobClient(filename);
-        const data = req.file.buffer;
-        await blobClient.upload(data, data.length);
-        const fileUrl = `${blobClient.url}`;
+        const fileUrl = file.url; 
         // end upload image
         const ngo = new Ngo({
           title: req.body.ngoTitle,
@@ -61,6 +48,7 @@ router.post('/register', upload.single('ngoIcon'), async (req, res) => {
     if (user) {
       await User.findByIdAndDelete(user._id); // Assuming you have a User model
     }
+    console.log("error registering user:", err.message);
     res.status(500).json({ message: 'Error registering user', error: err.message });
   }
 });

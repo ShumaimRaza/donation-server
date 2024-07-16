@@ -45,8 +45,8 @@ mongoose.connect(dbUri)
   });
 
   app.use(cors({
-    origin: 'https://www.donosphere.com',  
-    credentials: true 
+    origin: ['https://www.donosphere.com', 'http://localhost:3000'],
+    credentials: true
   }));
 
 

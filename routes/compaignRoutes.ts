@@ -11,20 +11,9 @@ import multer from 'multer';
 import path from 'path';
 import { UpdateQuery, FilterQuery } from 'mongoose';
 import { getOrCreateContainer } from '../storage/storage';
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dest = path.join(__dirname, '../uploads/photos');
-    cb(null, dest);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+import { uploader } from '../storage/uploader';
 
 const campaignRouter: Router = express.Router();
-
 
 async function addRandomClicksToCampaigns() {
   const campaigns = await Campaign.find();
@@ -59,7 +48,7 @@ async function addRandomClicksToCampaigns() {
   }
 }
 
-// addRandomClicksToCampaigns();
+//addRandomClicksToCampaigns();
 
 async function incrementClickCount(campaignId: string) {
   const today = new Date();
@@ -86,15 +75,12 @@ async function incrementClickCount(campaignId: string) {
   }
 }
 
-campaignRouter.post('/', upload.single('image'), async (req: any, res: any) => {
+campaignRouter.post('/', uploader.single('image'), async (req: any, res: any) => {
   try {
     const { title, description, total, type } = req.body;
     // upload image
-    const filename = `${Date.now()}-${req.file.originalname}`;
-    const blobClient = (await getOrCreateContainer("uploads")).getBlockBlobClient(filename);
-    const data = req.file.buffer;
-    await blobClient.upload(data, data.length);
-    const fileUrl = `${blobClient.url}`;
+    const file:any = req.file;
+    const fileUrl = file.url;
     // end upload image
     const ngo = req.user.ngo as INGO;
     const newCampaign = new Campaign({
