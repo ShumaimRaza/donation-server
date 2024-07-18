@@ -63,7 +63,7 @@ donationRouter.post('/', isAuthenticated, async (req: Request, res: Response) =>
     const totalDonations = updatedCampaign?.donations.reduce((total, donation) => total + donation.amount, 0) || 0;
 
     // Update the campaign's total with the calculated totalDonations
-    await Campaign.findByIdAndUpdate(campaign, { total: totalDonations });
+    //await Campaign.findByIdAndUpdate(campaign, { total: totalDonations });
 
     res.status(201).json({ donation: savedDonation, updatedCampaign });
   } catch (error) {
