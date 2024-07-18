@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+const GMAIL_USER="support@mjmarry.com"
+const GMAIL_PASS="oibn knok jhhw yxhj"
 
 export const sendMail = async (email: string, subject: string, message: string): Promise<boolean> => {
     let transporter = nodemailer.createTransport({
