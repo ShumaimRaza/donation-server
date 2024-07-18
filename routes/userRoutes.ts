@@ -8,20 +8,10 @@ import mongoose from 'mongoose';
 import { authenticate } from 'passport';
 import ValidationLog, {IValidation} from '../models/Validation';
 import { sendMail } from '../mailing/Mailing';
+import { uploader } from '../storage/uploader';
 const crypto = require('crypto');
 
 const profileRouter: Router = express.Router();
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dest = path.join(__dirname, '../uploads/photos');
-    cb(null, dest);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
 
 const isAuthenticated = (req: Request, res: Response, next: Function) => {
   if (req.isAuthenticated()) {
@@ -72,13 +62,13 @@ profileRouter.put('/profile', isAuthenticated, async (req: Request, res: Respons
   }
 });
 
-profileRouter.post('/profile/picture', isAuthenticated, upload.single('profilePicture'), async (req: Request, res: Response) => {
+profileRouter.post('/profile/picture', isAuthenticated, uploader.single('profilePicture'), async (req: Request, res: Response) => {
   try {
     const user = req.user as IUser;
-
     if (user.profile) {
       if (req.file) {
-        user.profile.profilePicture = `/user/download/${req.file.filename}`;
+        const file:any = req.file;
+        user.profile.profilePicture = file.url;
         await user.profile.save();
         return res.status(200).json({ message: 'Profile picture set successfully' });
       } else {
@@ -86,8 +76,9 @@ profileRouter.post('/profile/picture', isAuthenticated, upload.single('profilePi
       }
     } else {
       if (req.file) {
+        const file:any = req.file;
         user.profile = new Profile({
-          profilePicture: `/user/download/${req.file.filename}`
+          profilePicture: file.url
         });
         await user.profile.save();
         await user.save();
@@ -97,6 +88,7 @@ profileRouter.post('/profile/picture', isAuthenticated, upload.single('profilePi
       }
     }
   } catch (error) {
+    console.log("error uploading picture: ",error)
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
